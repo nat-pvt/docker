@@ -82,3 +82,16 @@ cd front && npm ci && npm run dev           # http://localhost:5173
 ```
 
 Tests de l'API (il faut la base) : `DATABASE_URL=... npm test`.
+
+## Sécurité
+
+Analyse Trivy (HIGH et CRITICAL) des images de production après `docker compose -f compose.yaml build --pull`. Les rapports sont dans `security/trivy/` : `*-q1.txt` (état initial), `*-q3.txt` (après `--pull`).
+
+### Vulnérabilités restantes
+
+| Image | Composant | CVE | Version installée | Version corrigée | Décision |
+|---|---|---|---|---|---|
+| api | `body-parser` (dépendance d'Express) | CVE-2026-111181 (HIGH) | 2.3.0 | 2.4.0 | À corriger : dépendance de l'application, mettre à jour le `package-lock.json`. |
+| api | npm embarqué dans `node:22-alpine` : `brace-expansion` (×5), `@npmcli/metavuln-calculator`, `pacote`, `picomatch`, `sigstore`, `ip-address` | CVE-2026-102276, CVE-2026-9496, CVE-2026-33671, CVE-2026-48815, CVE-2026-69192 (HIGH) | — | oui | Accepté : npm sert seulement au build (`npm ci`), l'API est lancée avec `node`. Correctif attendu dans une prochaine image `node:22-alpine`. |
+| api | npm embarqué : `http-cache-semantics` | CVE-2026-93748 (HIGH) | 4.2.0 | aucune | Accepté : pas de correctif publié, npm n'est pas utilisé à l'exécution. |
+| front | Paquets Alpine de `nginxinc/nginx-unprivileged:alpine` : `brotli-libs`, `curl`, `libcurl` | CVE-2026-111497, CVE-2026-92392 (HIGH) | 1.2.0-r1, 8.22.0-r0 | 1.2.1-r0, 8.23.0-r0 | Accepté temporairement : le correctif sera intégré au prochain `build --pull`, quand l'image de base sera republiée. |
