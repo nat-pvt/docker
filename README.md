@@ -4,13 +4,13 @@
 
 Raccourcisseur d'URL : on colle une URL, on obtient un lien court `/s/<code>` qui compte les clics.
 
-Elle est fournie **sans aucun fichier Docker** : c'est à vous de les écrire.
+Les fichiers Docker (Dockerfiles et Compose) sont ajoutés dans le cadre des TP.
 
 | Dossier | Contenu |
 |---|---|
 | `api/` | API Node.js 22 + Express, port 3000 |
 | `front/` | React + Vite |
-| `db/init.sql` | table `links` et deux liens de démo (PostgreSQL 17) |
+| `db/init.sql` | table `links` et trois liens de démo (PostgreSQL 17) |
 
 ## API
 
@@ -28,6 +28,46 @@ Variables d'environnement : `DATABASE_URL` (ex. `postgres://shorty:shorty@localh
 En dev, `npm run dev` lance Vite, qui relaie `/api` et `/s/` vers l'API (adresse dans `API_URL`, par défaut `http://localhost:3000`).
 
 En prod, `npm run build` produit des fichiers statiques dans `dist/`. Il faut un serveur web qui les sert et relaie `/api` et `/s/` vers l'API.
+
+## Lancer avec Docker (développement)
+
+Prérequis : Docker Desktop (ou Docker Engine avec Compose v2).
+
+```bash
+git clone <url-du-depot> tp-shorty
+cd tp-shorty
+cp .env.example .env
+docker compose up -d --build
+```
+
+L'application est disponible sur <http://localhost:5173> (serveur Vite). La base PostgreSQL est publiée sur le port 5432 pour permettre la connexion d'un client SQL depuis la machine hôte.
+
+Le fichier `compose.override.yaml` est chargé automatiquement par Compose quand on n'indique pas de fichier avec `-f`. Il ajoute :
+
+- les bind mounts du code de l'API et du front ;
+- `node --watch` pour l'API et le serveur Vite pour le front ;
+- la variable `API_URL` utilisée par le proxy de Vite ;
+- la publication du port 5432 de PostgreSQL.
+
+### Mode production (sans la surcharge)
+
+```bash
+docker compose -f compose.yaml up -d --build
+```
+
+L'application est alors servie par Nginx sur <http://localhost:8080>.
+
+### Remarque Windows / Docker Desktop
+
+Les bind mounts depuis un disque Windows ne propagent pas toujours les événements du système de fichiers (inotify). Le front utilise `watch.usePolling` dans `front/vite.config.js` pour que le HMR fonctionne. Pour l'API, `node --watch` peut ne pas redémarrer : exécuter le projet depuis le système de fichiers WSL, ou utiliser Compose Watch.
+
+### Compose Watch (synchronisation de l'API)
+
+```bash
+docker compose up --watch
+```
+
+Compose synchronise `api/src` dans le conteneur et reconstruit l'image si `api/package.json` change ; `node --watch` redémarre alors l'API. Cette commande reste au premier plan (Ctrl+C pour arrêter).
 
 ## Lancer sans Docker
 

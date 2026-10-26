@@ -7,3 +7,5 @@ CREATE TABLE links (
 INSERT INTO links (code, url, clicks) VALUES
     ('docker', 'https://docs.docker.com/', 12),
     ('ynov', 'https://www.ynov.com/', 5);
+
+INSERT INTO links (code, url, clicks) VALUES ('tp2', 'https://www.docker.com/', 0);

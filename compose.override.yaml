@@ -1,0 +1,25 @@
+services:
+  db:
+    ports:
+      - "5432:5432"
+
+  api:
+    command: node --watch src/server.js
+    develop:
+      watch:
+        - action: sync
+          path: ./api/src
+          target: /app/src
+        - action: rebuild
+          path: ./api/package.json
+
+  front:
+    build:
+      target: dev
+    environment:
+      API_URL: http://api:3000
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    ports: !override
+      - "5173:5173"
