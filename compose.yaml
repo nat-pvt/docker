@@ -26,7 +26,7 @@ services:
     security_opt: ["no-new-privileges:true"]
     init: true
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${DB_PASSWORD}@db:5432/${POSTGRES_DB}
     depends_on:
       db:
         condition: service_healthy
@@ -63,4 +63,4 @@ volumes:
 
 secrets:
   db_password:
-    environment: POSTGRES_PASSWORD
+    environment: DB_PASSWORD

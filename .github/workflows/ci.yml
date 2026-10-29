@@ -1,21 +1,43 @@
 name: CI
+
 on:
   push:
     branches: [main]                
+
 jobs:
   ci:
     runs-on: ubuntu-latest
     env:                                     
-      POSTGRES_PASSWORD: ci
+      DB_PASSWORD: ci
       POSTGRES_USER: shorty
       POSTGRES_DB: shorty
       DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
       TAG: ${{ github.ref_name }}
+
     steps:
       - uses: actions/checkout@v7
-      - run: docker compose -f compose.yaml build
-      - run: docker compose -f compose.yaml run --rm -v ./api/test:/app/test api node --test
-      - run: |
+
+      - name: Start PostgreSQL database
+        run: docker compose up -d --wait db
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test API
+        working-directory: api
+        env:
+          DATABASE_URL: postgres://shorty:ci@localhost:5432/shorty
+        run: |
+          npm ci
+          npm test
+
+      - name: Build production images
+        run: docker compose -f compose.yaml build
+
+      - name: Login and Push to Docker Hub
+        run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
             -u "$DOCKERHUB_USERNAME" --password-stdin
           docker compose push api front
