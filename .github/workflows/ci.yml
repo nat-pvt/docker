@@ -1,0 +1,19 @@
+name: CI
+on:
+  push:
+    branches: [main]                
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:                                     
+      DB_PASSWORD: ci
+      DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker compose -f compose.yaml build
+      - run: docker compose -f compose.yaml run --rm -v ./api/test:/app/test api node --test
+      - run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
+            -u "$DOCKERHUB_USERNAME" --password-stdin
+          docker compose push api front

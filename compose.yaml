@@ -20,6 +20,7 @@ services:
 
   api:
     build: ./api
+    image: ${DOCKERHUB_USERNAME}/shorty-api:${TAG:-latest}
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
@@ -40,6 +41,7 @@ services:
 
   front:
     build: ./front
+    image: ${DOCKERHUB_USERNAME}/shorty-api:${TAG:-latest}
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
