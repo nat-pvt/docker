@@ -1,5 +1,7 @@
 # TP Shorty
 
+[![CI](https://github.com/nat-pvt/docker/actions/workflows/ci.yml/badge.svg)](https://github.com/nat-pvt/docker/actions/workflows/ci.yml)
+
 > **Projet de TP** du cours « Dév avec Docker » (M2 Expert Développement Full Stack). Ce n'est pas une application maintenue : elle sert de support aux exercices.
 
 Raccourcisseur d'URL : on colle une URL, on obtient un lien court `/s/<code>` qui compte les clics.
@@ -95,3 +97,17 @@ Analyse Trivy (HIGH et CRITICAL) des images de production après `docker compose
 | api | npm embarqué dans `node:22-alpine` : `brace-expansion` (×5), `@npmcli/metavuln-calculator`, `pacote`, `picomatch`, `sigstore`, `ip-address` | CVE-2026-102276, CVE-2026-9496, CVE-2026-33671, CVE-2026-48815, CVE-2026-69192 (HIGH) | — | oui | Accepté : npm sert seulement au build (`npm ci`), l'API est lancée avec `node`. Correctif attendu dans une prochaine image `node:22-alpine`. |
 | api | npm embarqué : `http-cache-semantics` | CVE-2026-93748 (HIGH) | 4.2.0 | aucune | Accepté : pas de correctif publié, npm n'est pas utilisé à l'exécution. |
 | front | Paquets Alpine de `nginxinc/nginx-unprivileged:alpine` : `brotli-libs`, `curl`, `libcurl` | CVE-2026-111497, CVE-2026-92392 (HIGH) | 1.2.0-r1, 8.22.0-r0 | 1.2.1-r0, 8.23.0-r0 | Accepté temporairement : le correctif sera intégré au prochain `build --pull`, quand l'image de base sera republiée. |
+
+## Publication des images Docker et Tags
+Les images Docker de l'API (`shorty-api`) et du Front (`shorty-front`) sont automatiquement construites, testées et analysées contre les vulnérabilités critiques via notre pipeline GitHub Actions.
+### Quand les images sont-elles publiées ?
+1. **À chaque push sur la branche `main`** :
+   - L'image est étiquetée avec le tag **`main`**.
+   - C'est un tag mutable représentant la dernière version d'intégration.
+2. **À chaque création d'un tag Git de version (ex: `git tag v0.1.0`)** :
+   - L'image est étiquetée avec le tag immuable correspondant (ex: **`v0.1.0`**).
+
+### Quel tag déployer en production ?
+> **En production, il faut TOUJOURS déployer un tag de version figé (ex: `v0.1.0`), et JAMAIS le tag `main` ou `latest` !**
+- **Pourquoi ?** Le tag `main` change à chaque nouveau push. Déployer `main` en production risquerait d'écraser une version stable avec du code non validé.
+- Un tag comme **`v0.1.0`** est immuable : il garantit que le code déployé reste strictement identique dans le temps et permet un retour en arrière (*rollback*) fiable en cas de problème.
