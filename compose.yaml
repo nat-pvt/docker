@@ -41,7 +41,7 @@ services:
 
   front:
     build: ./front
-    image: ${DOCKERHUB_USERNAME}/shorty-api:${TAG:-latest}
+    image: ${DOCKERHUB_USERNAME}/shorty-front:${TAG:-latest}
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]

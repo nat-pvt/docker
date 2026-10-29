@@ -6,7 +6,9 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     env:                                     
-      DB_PASSWORD: ci
+      POSTGRES_PASSWORD: ci
+      POSTGRES_USER: shorty
+      POSTGRES_DB: shorty
       DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
       TAG: ${{ github.ref_name }}
     steps:
