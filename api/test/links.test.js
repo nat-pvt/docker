@@ -15,6 +15,6 @@ test('crée un lien puis redirige', async () => {
   }).then((r) => r.json());
 
   const res = await fetch(`${base}/s/${created.code}`, { redirect: 'manual' });
-  assert.equal(res.status, 999);
+  assert.equal(res.status, 302);
   assert.equal(res.headers.get('location'), 'https://example.com/');
 });
