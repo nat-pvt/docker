@@ -2,12 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]                
+    branches: [main]
+    tags: ['v*']
 
 jobs:
   ci:
     runs-on: ubuntu-latest
-    env:                                     
+    env:
       DB_PASSWORD: ci
       POSTGRES_USER: shorty
       POSTGRES_DB: shorty
@@ -17,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Start PostgreSQL database
+      - name: Démarrer la db
         run: docker compose up -d --wait db
 
       - name: Setup Node 22
@@ -33,10 +34,10 @@ jobs:
           npm ci
           npm test
 
-      - name: Build production images
+      - name: Construire l'image de prod
         run: docker compose -f compose.yaml build
 
-      - name: Login and Push to Docker Hub
+      - name: Login et push sur docker hub
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
             -u "$DOCKERHUB_USERNAME" --password-stdin
