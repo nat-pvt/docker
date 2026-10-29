@@ -37,6 +37,18 @@ jobs:
       - name: Construire l'image de prod
         run: docker compose -f compose.yaml build
 
+      - name: Scan api avec trixy
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image \
+            --severity CRITICAL --ignore-unfixed --exit-code 1 \
+            "$DOCKERHUB_USERNAME/shorty-api:$TAG"
+
+      - name: Scan front avec trixy
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image \
+            --severity CRITICAL --ignore-unfixed --exit-code 1 \
+            "$DOCKERHUB_USERNAME/shorty-front:$TAG"
+
       - name: Login et push sur docker hub
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
